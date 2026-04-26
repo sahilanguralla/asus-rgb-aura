@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      DEBEMAIL: "github-actions[bot]@users.noreply.github.com"
+      DEBFULLNAME: "github-actions[bot]"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -50,7 +53,7 @@ jobs:
           fi
           
           # Update changelog
-          dch --newversion ${NEXT_VERSION}-1 --distribution unstable "Automated release preparation for version $NEXT_VERSION"
+          dch --no-query --newversion ${NEXT_VERSION}-1 --distribution unstable "Automated release preparation for version $NEXT_VERSION"
           
           # Commit and push back to PR branch
           git config user.name "github-actions[bot]"
