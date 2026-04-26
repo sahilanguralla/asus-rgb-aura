@@ -6,7 +6,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "dch --newversion ${nextRelease.version}-1 --distribution unstable \"${nextRelease.notes}\""
+        "prepareCmd": "dch --newversion ${nextRelease.version}-1 --distribution unstable \"${nextRelease.notes}\" && ./build.sh"
       }
     ],
     [
@@ -16,6 +16,13 @@
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
-    "@semantic-release/github"
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {"path": "dist/*.deb", "label": "Debian Package"}
+        ]
+      }
+    ]
   ]
 }
