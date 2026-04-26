@@ -566,4 +566,6 @@ class AsusAuraGui(Gtk.Window):
 if __name__ == '__main__':
     win = AsusAuraGui()
     win.connect("destroy", Gtk.main_quit)
+    if "--test-startup" in sys.argv:
+        GLib.idle_add(Gtk.main_quit)
     Gtk.main()

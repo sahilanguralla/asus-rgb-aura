@@ -1,0 +1,35 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main, gui-effects ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            debhelper devscripts dpkg-dev build-essential \
+            make gcc autoconf libusb-1.0-0-dev \
+            python3-gi gir1.2-gtk-3.0 \
+            whiptail xvfb
+
+      - name: Build Debian package
+        run: ./build.sh
+
+      - name: Dry run - asus-rgb-setup
+        run: xvfb-run python3 src/asus-rgb-setup --dry-run --test-startup
+
+      - name: Dry run - asus-rgb-control
+        run: ./src/asus-rgb-control --dry-run
+
+      - name: Dry run - asus-rgb-cycle
+        run: ./src/asus-rgb-cycle next --dry-run
