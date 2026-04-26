@@ -14,8 +14,8 @@ jobs:
       issues: write
       pull-requests: write
     env:
-      DEBEMAIL: "github-actions[bot]@users.noreply.github.com"
-      DEBFULLNAME: "github-actions[bot]"
+      DEBEMAIL: "asus-rgb-dev@thev.dev"
+      DEBFULLNAME: "ASUS RGB Developer"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
