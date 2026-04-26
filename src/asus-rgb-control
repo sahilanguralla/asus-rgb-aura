@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# ASUS ROG Scar III RGB Keyboard Control Script
+# Uses rogauracore to interface with the keyboard controller
+
+if ! command -v rogauracore &> /dev/null
+then
+    echo "rogauracore could not be found."
+    echo "Please ensure the package was installed correctly."
+    exit 1
+fi
+
+if ! command -v whiptail &> /dev/null
+then
+    echo "whiptail could not be found. Please install it (sudo apt install whiptail)."
+    exit 1
+fi
+
+while true; do
+    CHOICE=$(whiptail --title "ASUS ROG Keyboard RGB Control" --menu "Choose an option" 20 65 10 \
+    "1" "Initialize Keyboard (Run if unresponsive)" \
+    "2" "Set Predefined Solid Color" \
+    "3" "Set Custom Solid Color (HEX)" \
+    "4" "Set Breathing Effect" \
+    "5" "Set Colorcycle Effect" \
+    "6" "Set Rainbow Effect" \
+    "7" "Set Brightness" \
+    "8" "Turn Off RGB (Black)" \
+    "9" "Exit" 3>&1 1>&2 2>&3)
+
+    if [ -z "$CHOICE" ]; then
+        exit 0
+    fi
+
+    case $CHOICE in
+        1)
+            rogauracore initialize_keyboard
+            whiptail --msgbox "Keyboard initialized!" 8 45
+            ;;
+        2)
+            COLOR=$(whiptail --title "Predefined Colors" --menu "Choose a color:" 20 50 10 \
+            "red" "" "green" "" "blue" "" "yellow" "" "gold" "" "cyan" "" "magenta" "" "white" "" 3>&1 1>&2 2>&3)
+            if [ ! -z "$COLOR" ]; then
+                rogauracore $COLOR
+            fi
+            ;;
+        3)
+            HEX=$(whiptail --title "Custom Static Color" --inputbox "Enter Hex Color (e.g., ff0000 for red):" 10 50 3>&1 1>&2 2>&3)
+            if [ ! -z "$HEX" ]; then
+                rogauracore single_static $HEX
+            fi
+            ;;
+        4)
+            HEX1=$(whiptail --title "Breathing Color 1" --inputbox "Enter First Hex Color (e.g., ff0000):" 10 50 3>&1 1>&2 2>&3)
+            if [ ! -z "$HEX1" ]; then
+                HEX2=$(whiptail --title "Breathing Color 2" --inputbox "Enter Second Hex Color (e.g., 00ff00):" 10 50 3>&1 1>&2 2>&3)
+                if [ ! -z "$HEX2" ]; then
+                    SPEED=$(whiptail --title "Speed" --menu "Choose breathing speed:" 15 40 3 \
+                    "1" "Slow" "2" "Medium" "3" "Fast" 3>&1 1>&2 2>&3)
+                    if [ ! -z "$SPEED" ]; then
+                        rogauracore single_breathing $HEX1 $HEX2 $SPEED
+                    fi
+                fi
+            fi
+            ;;
+        5)
+            rogauracore single_colorcycle
+            ;;
+        6)
+            rogauracore rainbow
+            ;;
+        7)
+            BRT=$(whiptail --title "Brightness" --menu "Choose brightness level:" 15 40 4 \
+            "1" "Low" "2" "Medium" "3" "High" "0" "Off" 3>&1 1>&2 2>&3)
+            if [ ! -z "$BRT" ]; then
+                rogauracore brightness $BRT
+            fi
+            ;;
+        8)
+            rogauracore black
+            ;;
+        9)
+            exit 0
+            ;;
+    esac
+done

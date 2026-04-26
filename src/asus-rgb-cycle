@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# A script to cycle through some popular RGB modes.
+# You can bind this script to your Fn+Right key in Ubuntu Keyboard Settings.
+
+STATE_FILE="$HOME/.config/rogauracore_state"
+
+if [ ! -f "$STATE_FILE" ]; then
+    mkdir -p "$HOME/.config"
+    echo "0" > "$STATE_FILE"
+fi
+
+STATE=$(cat "$STATE_FILE")
+
+case $STATE in
+    0)
+        rogauracore red
+        echo "1" > "$STATE_FILE"
+        ;;
+    1)
+        rogauracore green
+        echo "2" > "$STATE_FILE"
+        ;;
+    2)
+        rogauracore blue
+        echo "3" > "$STATE_FILE"
+        ;;
+    3)
+        rogauracore rainbow
+        echo "4" > "$STATE_FILE"
+        ;;
+    4)
+        rogauracore single_colorcycle
+        echo "5" > "$STATE_FILE"
+        ;;
+    5)
+        # single_breathing Color1 Color2 Speed(1-3)
+        rogauracore single_breathing ff0000 0000ff 2
+        echo "6" > "$STATE_FILE"
+        ;;
+    6)
+        rogauracore black
+        echo "0" > "$STATE_FILE"
+        ;;
+    *)
+        rogauracore rainbow
+        echo "0" > "$STATE_FILE"
+        ;;
+esac

@@ -1,0 +1,3 @@
+src/* usr/bin/
+data/99-rogauracore.rules etc/udev/rules.d/
+data/asus-rgb-setup.desktop usr/share/applications/

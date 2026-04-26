@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+import gi
+import subprocess
+import ast
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk
+
+def add_custom_shortcut(name, command, binding):
+    schema = 'org.gnome.settings-daemon.plugins.media-keys'
+    key = 'custom-keybindings'
+    
+    try:
+        output = subprocess.check_output(['gsettings', 'get', schema, key], text=True).strip()
+    except Exception as e:
+        print("Error getting gsettings:", e)
+        return False
+        
+    if output == '@as []':
+        bindings = []
+    else:
+        try:
+            bindings = ast.literal_eval(output)
+        except Exception:
+            bindings = []
+            
+    new_path = "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/asus-rgb/"
+    if new_path not in bindings:
+        bindings.append(new_path)
+        
+    bindings_str = str(bindings).replace("'", '"')
+    
+    try:
+        subprocess.run(['gsettings', 'set', schema, key, bindings_str], check=True)
+        schema_custom = 'org.gnome.settings-daemon.plugins.media-keys.custom-keybinding'
+        path_arg = schema_custom + ':' + new_path
+        subprocess.run(['gsettings', 'set', path_arg, 'name', name], check=True)
+        subprocess.run(['gsettings', 'set', path_arg, 'command', command], check=True)
+        subprocess.run(['gsettings', 'set', path_arg, 'binding', binding], check=True)
+        return True
+    except Exception as e:
+        print("Error setting custom keybinding:", e)
+        return False
+
+class SetupWindow(Gtk.Window):
+    def __init__(self):
+        super().__init__(title="ASUS RGB Setup")
+        self.set_border_width(20)
+        self.set_default_size(400, 200)
+
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        self.add(vbox)
+
+        try:
+            with open("/sys/class/dmi/id/product_name", "r") as f:
+                model = f.read().strip()
+        except Exception:
+            model = "Unknown"
+
+        if "G531" in model or "Scar" in model or "ROG" in model:
+            lbl = Gtk.Label(label=f"Detected ASUS ROG ({model})!\n\nClick the button below and press your Aura Key\n(typically Fn+Right or Fn+Left) to bind it automatically.")
+        else:
+            lbl = Gtk.Label(label=f"Detected Model: {model}\n\nClick the button below and press any key\nyou want to use to cycle your RGB effects.")
+        
+        lbl.set_justify(Gtk.Justification.CENTER)
+        vbox.pack_start(lbl, True, True, 0)
+
+        self.btn = Gtk.Button(label="Click to Bind Key")
+        self.btn.connect("clicked", self.on_btn_clicked)
+        # Make the button large and prominent
+        self.btn.set_size_request(200, 50)
+        vbox.pack_start(self.btn, True, True, 0)
+        
+        self.listening = False
+        self.connect("key-press-event", self.on_key_press)
+
+    def on_btn_clicked(self, widget):
+        self.btn.set_label("Listening... Press a key!")
+        self.listening = True
+
+    def on_key_press(self, widget, event):
+        if not self.listening:
+            return False
+            
+        keyname = Gdk.keyval_name(event.keyval)
+        if not keyname:
+            return False
+            
+        mods = ""
+        # Check modifiers
+        if event.state & Gdk.ModifierType.CONTROL_MASK:
+            mods += "<Primary>"
+        if event.state & Gdk.ModifierType.MOD1_MASK:
+            mods += "<Alt>"
+        if event.state & Gdk.ModifierType.SHIFT_MASK:
+            mods += "<Shift>"
+        if event.state & Gdk.ModifierType.SUPER_MASK:
+            mods += "<Super>"
+            
+        binding = mods + keyname
+        
+        # Don't capture just a lone modifier key
+        if keyname in ['Control_L', 'Control_R', 'Shift_L', 'Shift_R', 'Alt_L', 'Alt_R', 'Super_L', 'Super_R']:
+            return False
+            
+        success = add_custom_shortcut("ASUS RGB Cycle", "/usr/bin/asus-rgb-cycle", binding)
+        
+        if success:
+            dialog = Gtk.MessageDialog(
+                transient_for=self,
+                flags=0,
+                message_type=Gtk.MessageType.INFO,
+                buttons=Gtk.ButtonsType.OK,
+                text="Success!"
+            )
+            dialog.format_secondary_text(f"Successfully bound '{binding}' to cycle RGB modes.")
+            dialog.run()
+            dialog.destroy()
+            self.btn.set_label("Key Bound Successfully! (Click to re-bind)")
+        else:
+            self.btn.set_label("Failed to bind key.")
+            
+        self.listening = False
+        return True
+
+if __name__ == '__main__':
+    win = SetupWindow()
+    win.connect("destroy", Gtk.main_quit)
+    win.show_all()
+    Gtk.main()

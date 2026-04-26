@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
+    echo "Reloading udev rules to remove rogauracore rules..."
+    udevadm control --reload-rules || true
+    udevadm trigger || true
+    
+    echo "Removing rogauracore binary..."
+    rm -f /usr/local/bin/rogauracore
+    
+    echo "Cleaning up user state files..."
+    rm -f /home/*/.config/rogauracore_state
+    
+    echo ""
+    echo "NOTE: If you used the ASUS RGB Setup GUI to bind a keyboard shortcut,"
+    echo "that shortcut will remain in your GNOME Settings but will no longer do anything."
+    echo "You can manually delete it by going to Settings -> Keyboard -> Custom Shortcuts."
+    echo ""
+fi
+
+exit 0
