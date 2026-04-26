@@ -17,6 +17,9 @@ install:
 	
 	install -d $(DESTDIR)$(UDEVDIR)
 	install -m 644 data/99-rogauracore.rules $(DESTDIR)$(UDEVDIR)/
+	
+	install -d $(DESTDIR)$(DATADIR)/icons/hicolor/256x256/apps
+	install -m 644 data/icons/asus-rgb-setup.png $(DESTDIR)$(DATADIR)/icons/hicolor/256x256/apps/
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/asus-rgb-control
@@ -24,3 +27,4 @@ uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/asus-rgb-setup
 	rm -f $(DESTDIR)$(DATADIR)/applications/asus-rgb-setup.desktop
 	rm -f $(DESTDIR)$(UDEVDIR)/99-rogauracore.rules
+	rm -f $(DESTDIR)$(DATADIR)/icons/hicolor/256x256/apps/asus-rgb-setup.png

@@ -2,7 +2,7 @@
 Name=ASUS RGB Setup
 Comment=Configure your ASUS ROG Keyboard RGB Shortcuts
 Exec=/usr/bin/asus-rgb-setup
-Icon=preferences-desktop-keyboard
+Icon=asus-rgb-setup
 Terminal=false
 Type=Application
 Categories=Settings;HardwareSettings;
