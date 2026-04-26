@@ -30,8 +30,16 @@ if ! command -v rogauracore &> /dev/null; then
     rm -rf "$BUILD_DIR"
     
     echo "rogauracore installed successfully!"
-else
-    echo "rogauracore is already installed."
+fi
+
+# Set default effect to Rainbow immediately
+if command -v rogauracore &> /dev/null; then
+    echo "Setting default effect to Rainbow..."
+    # Try to initialize and set rainbow. 
+    # This might fail if the user is in a root session without access to the USB device yet,
+    # but the udev rules were reloaded above.
+    rogauracore initialize_keyboard || true
+    rogauracore rainbow_cycle 2 || true
 fi
 
 exit 0

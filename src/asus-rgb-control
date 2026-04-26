@@ -64,10 +64,18 @@ while true; do
             fi
             ;;
         5)
-            rogauracore single_colorcycle
+            SPEED=$(whiptail --title "Speed" --menu "Choose colorcycle speed:" 15 40 3 \
+            "1" "Slow" "2" "Medium" "3" "Fast" 3>&1 1>&2 2>&3)
+            if [ ! -z "$SPEED" ]; then
+                rogauracore single_colorcycle $SPEED
+            fi
             ;;
         6)
-            rogauracore rainbow
+            SPEED=$(whiptail --title "Speed" --menu "Choose rainbow speed:" 15 40 3 \
+            "1" "Slow" "2" "Medium" "3" "Fast" 3>&1 1>&2 2>&3)
+            if [ ! -z "$SPEED" ]; then
+                rogauracore rainbow_cycle $SPEED
+            fi
             ;;
         7)
             BRT=$(whiptail --title "Brightness" --menu "Choose brightness level:" 15 40 4 \

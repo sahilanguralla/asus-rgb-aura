@@ -1,15 +1,16 @@
 #!/bin/bash
 
-# A script to cycle through popular RGB modes.
+# A script to cycle through all available RGB modes.
 # Usage: asus-rgb-cycle [next|prev]
 # Bind to Fn+Right (next) and Fn+Left (prev) in Ubuntu Keyboard Settings.
 
 STATE_FILE="$HOME/.config/rogauracore_state"
-MAX_STATE=6
+MAX_STATE=11
 
+# If state file doesn't exist, default to 8 (Rainbow)
 if [ ! -f "$STATE_FILE" ]; then
     mkdir -p "$HOME/.config"
-    echo "0" > "$STATE_FILE"
+    echo "8" > "$STATE_FILE"
 fi
 
 STATE=$(cat "$STATE_FILE")
@@ -33,21 +34,36 @@ case $STATE in
         rogauracore blue
         ;;
     3)
-        rogauracore rainbow
+        rogauracore yellow
         ;;
     4)
-        rogauracore single_colorcycle
+        rogauracore cyan
         ;;
     5)
-        # single_breathing Color1 Color2 Speed(1-3)
-        rogauracore single_breathing ff0000 0000ff 2
+        rogauracore magenta
         ;;
     6)
+        rogauracore gold
+        ;;
+    7)
+        rogauracore white
+        ;;
+    8)
+        rogauracore rainbow_cycle 2
+        ;;
+    9)
+        rogauracore single_colorcycle 2
+        ;;
+    10)
+        rogauracore single_breathing ff0000 0000ff 2
+        ;;
+    11)
         rogauracore black
         ;;
     *)
-        rogauracore rainbow
-        STATE=3
+        # Default fallback to Rainbow
+        rogauracore rainbow_cycle 2
+        STATE=8
         ;;
 esac
 
