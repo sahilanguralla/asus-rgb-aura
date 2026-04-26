@@ -26,13 +26,13 @@ This is the recommended method. It automatically handles dependencies and compil
    sudo apt update
    sudo apt install debhelper
    ```
-2. Build the package from the source directory:
+2. Build the package using the provided build script:
    ```bash
-   dpkg-buildpackage -us -uc -b
+   ./build.sh
    ```
-3. Install the generated `.deb` file (located in the parent directory):
+3. Install the generated `.deb` file (located in the new `dist/` directory):
    ```bash
-   sudo apt install ../asus-rgb-control_1.0.0-1_all.deb
+   sudo apt install ./dist/asus-rgb-control_1.0.0-1_all.deb
    ```
 
 ### Method 2: Manual Source Installation (For Arch, Fedora, etc.)
