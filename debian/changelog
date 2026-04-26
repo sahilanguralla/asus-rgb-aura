@@ -1,3 +1,14 @@
+asus-rgb-control (1.1.1-1) unstable; urgency=medium
+
+  * ## [1.1.1](https://github.com/sahilanguralla/asus-rgb-
+    aura/compare/v1.1.0...v1.1.1) (2026-04-26)   ### Bug Fixes  *
+    **gui:** fixed non-functional actions in UI
+    ([#3](https://github.com/sahilanguralla/asus-rgb-aura/issues/3))
+    ([d2aefb3](https://github.com/sahilanguralla/asus-rgb-
+    aura/commit/d2aefb355b2b626ae3a37011454cc5120a8e661d))
+
+ -- ASUS RGB Developer <asus-rgb-dev@thev.dev>  Sun, 26 Apr 2026 07:29:32 +0000
+
 asus-rgb-control (1.1.0-1) unstable; urgency=medium
 
   * # [1.1.0](https://github.com/sahilanguralla/asus-rgb-
