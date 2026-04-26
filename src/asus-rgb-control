@@ -5,15 +5,36 @@
 
 if ! command -v rogauracore &> /dev/null
 then
-    echo "rogauracore could not be found."
-    echo "Please ensure the package was installed correctly."
-    exit 1
+    if [[ "$*" != *"--dry-run"* ]]; then
+        echo "rogauracore could not be found."
+        echo "Please ensure the package was installed correctly."
+        exit 1
+    fi
 fi
 
 if ! command -v whiptail &> /dev/null
 then
     echo "whiptail could not be found. Please install it (sudo apt install whiptail)."
     exit 1
+fi
+
+DRY_RUN=false
+if [[ "$*" == *"--dry-run"* ]]; then
+    DRY_RUN=true
+fi
+
+run_cmd() {
+    if [ "$DRY_RUN" = true ]; then
+        echo "[DRY-RUN] $*"
+    else
+        "$@"
+    fi
+}
+
+if [ "$DRY_RUN" = true ]; then
+    echo "Dry run: asus-rgb-control is working fine."
+    run_cmd rogauracore initialize_keyboard
+    exit 0
 fi
 
 while true; do
@@ -34,20 +55,20 @@ while true; do
 
     case $CHOICE in
         1)
-            rogauracore initialize_keyboard
+            run_cmd rogauracore initialize_keyboard
             whiptail --msgbox "Keyboard initialized!" 8 45
             ;;
         2)
             COLOR=$(whiptail --title "Predefined Colors" --menu "Choose a color:" 20 50 10 \
             "red" "" "green" "" "blue" "" "yellow" "" "gold" "" "cyan" "" "magenta" "" "white" "" 3>&1 1>&2 2>&3)
             if [ ! -z "$COLOR" ]; then
-                rogauracore $COLOR
+                run_cmd rogauracore $COLOR
             fi
             ;;
         3)
             HEX=$(whiptail --title "Custom Static Color" --inputbox "Enter Hex Color (e.g., ff0000 for red):" 10 50 3>&1 1>&2 2>&3)
             if [ ! -z "$HEX" ]; then
-                rogauracore single_static $HEX
+                run_cmd rogauracore single_static $HEX
             fi
             ;;
         4)
@@ -58,7 +79,7 @@ while true; do
                     SPEED=$(whiptail --title "Speed" --menu "Choose breathing speed:" 15 40 3 \
                     "1" "Slow" "2" "Medium" "3" "Fast" 3>&1 1>&2 2>&3)
                     if [ ! -z "$SPEED" ]; then
-                        rogauracore single_breathing $HEX1 $HEX2 $SPEED
+                        run_cmd rogauracore single_breathing $HEX1 $HEX2 $SPEED
                     fi
                 fi
             fi
@@ -67,25 +88,25 @@ while true; do
             SPEED=$(whiptail --title "Speed" --menu "Choose colorcycle speed:" 15 40 3 \
             "1" "Slow" "2" "Medium" "3" "Fast" 3>&1 1>&2 2>&3)
             if [ ! -z "$SPEED" ]; then
-                rogauracore single_colorcycle $SPEED
+                run_cmd rogauracore single_colorcycle $SPEED
             fi
             ;;
         6)
             SPEED=$(whiptail --title "Speed" --menu "Choose rainbow speed:" 15 40 3 \
             "1" "Slow" "2" "Medium" "3" "Fast" 3>&1 1>&2 2>&3)
             if [ ! -z "$SPEED" ]; then
-                rogauracore rainbow_cycle $SPEED
+                run_cmd rogauracore rainbow_cycle $SPEED
             fi
             ;;
         7)
             BRT=$(whiptail --title "Brightness" --menu "Choose brightness level:" 15 40 4 \
             "1" "Low" "2" "Medium" "3" "High" "0" "Off" 3>&1 1>&2 2>&3)
             if [ ! -z "$BRT" ]; then
-                rogauracore brightness $BRT
+                run_cmd rogauracore brightness $BRT
             fi
             ;;
         8)
-            rogauracore black
+            run_cmd rogauracore black
             ;;
         9)
             exit 0

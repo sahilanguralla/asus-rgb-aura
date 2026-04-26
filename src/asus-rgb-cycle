@@ -1,11 +1,24 @@
 #!/bin/bash
 
 # A script to cycle through all available RGB modes.
-# Usage: asus-rgb-cycle [next|prev]
+# Usage: asus-rgb-cycle [next|prev] [--dry-run]
 # Bind to Fn+Right (next) and Fn+Left (prev) in Ubuntu Keyboard Settings.
 
 STATE_FILE="$HOME/.config/rogauracore_state"
 MAX_STATE=11
+
+DRY_RUN=false
+if [[ "$*" == *"--dry-run"* ]]; then
+    DRY_RUN=true
+fi
+
+run_cmd() {
+    if [ "$DRY_RUN" = true ]; then
+        echo "[DRY-RUN] $*"
+    else
+        "$@"
+    fi
+}
 
 # If state file doesn't exist, default to 8 (Rainbow)
 if [ ! -f "$STATE_FILE" ]; then
@@ -15,7 +28,12 @@ fi
 
 STATE=$(cat "$STATE_FILE")
 
-DIRECTION="${1:-next}"
+DIRECTION="next"
+for arg in "$@"; do
+    if [ "$arg" == "next" ] || [ "$arg" == "prev" ]; then
+        DIRECTION="$arg"
+    fi
+done
 
 if [ "$DIRECTION" = "next" ]; then
     STATE=$(( (STATE + 1) % (MAX_STATE + 1) ))
@@ -25,44 +43,44 @@ fi
 
 case $STATE in
     0)
-        rogauracore red
+        run_cmd rogauracore red
         ;;
     1)
-        rogauracore green
+        run_cmd rogauracore green
         ;;
     2)
-        rogauracore blue
+        run_cmd rogauracore blue
         ;;
     3)
-        rogauracore yellow
+        run_cmd rogauracore yellow
         ;;
     4)
-        rogauracore cyan
+        run_cmd rogauracore cyan
         ;;
     5)
-        rogauracore magenta
+        run_cmd rogauracore magenta
         ;;
     6)
-        rogauracore gold
+        run_cmd rogauracore gold
         ;;
     7)
-        rogauracore white
+        run_cmd rogauracore white
         ;;
     8)
-        rogauracore rainbow_cycle 2
+        run_cmd rogauracore rainbow_cycle 2
         ;;
     9)
-        rogauracore single_colorcycle 2
+        run_cmd rogauracore single_colorcycle 2
         ;;
     10)
-        rogauracore single_breathing ff0000 0000ff 2
+        run_cmd rogauracore single_breathing ff0000 0000ff 2
         ;;
     11)
-        rogauracore black
+        run_cmd rogauracore black
         ;;
     *)
         # Default fallback to Rainbow
-        rogauracore rainbow_cycle 2
+        run_cmd rogauracore rainbow_cycle 2
         STATE=8
         ;;
 esac
