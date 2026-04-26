@@ -1,6 +1,6 @@
 [Desktop Entry]
-Name=ASUS RGB Setup
-Comment=Configure your ASUS ROG Keyboard RGB Shortcuts
+Name=ASUS Aura Control
+Comment=Control your ASUS ROG Keyboard RGB Lighting and Shortcuts
 Exec=/usr/bin/asus-rgb-setup
 Icon=asus-rgb-setup
 Terminal=false

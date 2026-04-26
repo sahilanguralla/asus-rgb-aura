@@ -2,9 +2,97 @@
 import gi
 import subprocess
 import ast
+import os
+import sys
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
+
+# Constants
+STATE_FILE = os.path.expanduser("~/.config/rogauracore_state")
+DRY_RUN = "--dry-run" in sys.argv
+
+# CSS for a premium dark look
+CSS = """
+window {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+}
+headerbar {
+    background: linear-gradient(to bottom, #313244, #181825);
+    border-bottom: 1px solid #45475a;
+    padding: 6px;
+}
+headerbar .title {
+    font-weight: bold;
+    color: #f5e0dc;
+}
+.main-box {
+    padding: 20px;
+}
+.card {
+    background-color: #313244;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #45475a;
+}
+.mode-button {
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 8px;
+}
+.mode-button:checked {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+label.section-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #89b4fa;
+}
+scale contents trough {
+    background-color: #45475a;
+    border-radius: 4px;
+}
+scale contents highlight {
+    background-color: #89b4fa;
+    border-radius: 4px;
+}
+button.suggested-action {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+"""
+
+def run_cmd(args):
+    if DRY_RUN:
+        print(f"[DRY-RUN] Executing: {' '.join(args)}")
+        return True
+    try:
+        subprocess.run(args, check=True)
+        return True
+    except Exception as e:
+        print(f"Error executing {' '.join(args)}: {e}")
+        return False
+
+def set_state(index):
+    try:
+        os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+        with open(STATE_FILE, "w") as f:
+            f.write(str(index))
+    except Exception as e:
+        print(f"Error saving state: {e}")
+
+def get_state():
+    if not os.path.exists(STATE_FILE):
+        return 8 # Default to Rainbow
+    try:
+        with open(STATE_FILE, "r") as f:
+            return int(f.read().strip())
+    except Exception:
+        return 8
 
 def add_custom_shortcut(shortcut_id, name, command, binding):
     schema = 'org.gnome.settings-daemon.plugins.media-keys'
@@ -12,8 +100,7 @@ def add_custom_shortcut(shortcut_id, name, command, binding):
     
     try:
         output = subprocess.check_output(['gsettings', 'get', schema, key], text=True).strip()
-    except Exception as e:
-        print("Error getting gsettings:", e)
+    except Exception:
         return False
         
     if output == '@as []':
@@ -38,134 +125,275 @@ def add_custom_shortcut(shortcut_id, name, command, binding):
         subprocess.run(['gsettings', 'set', path_arg, 'command', command], check=True)
         subprocess.run(['gsettings', 'set', path_arg, 'binding', binding], check=True)
         return True
-    except Exception as e:
-        print("Error setting custom keybinding:", e)
+    except Exception:
         return False
 
-def build_binding_string(event):
-    keyname = Gdk.keyval_name(event.keyval)
-    if not keyname:
-        return None
-    # Ignore lone modifier keys
-    if keyname in ['Control_L', 'Control_R', 'Shift_L', 'Shift_R',
-                   'Alt_L', 'Alt_R', 'Super_L', 'Super_R']:
-        return None
-    mods = ""
-    if event.state & Gdk.ModifierType.CONTROL_MASK:
-        mods += "<Primary>"
-    if event.state & Gdk.ModifierType.MOD1_MASK:
-        mods += "<Alt>"
-    if event.state & Gdk.ModifierType.SHIFT_MASK:
-        mods += "<Shift>"
-    if event.state & Gdk.ModifierType.SUPER_MASK:
-        mods += "<Super>"
-    return mods + keyname
-
-class SetupWindow(Gtk.Window):
+class AsusRGBGui(Gtk.Window):
     def __init__(self):
-        super().__init__(title="ASUS RGB Setup")
-        self.set_border_width(20)
-        self.set_default_size(450, 300)
-
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
-        self.add(vbox)
-
-        try:
-            with open("/sys/class/dmi/id/product_name", "r") as f:
-                model = f.read().strip()
-        except Exception:
-            model = "Unknown"
-
-        if "G531" in model or "Scar" in model or "ROG" in model:
-            lbl = Gtk.Label(label=f"Detected ASUS ROG ({model})!\n\nBind your Aura keys below.")
-        else:
-            lbl = Gtk.Label(label=f"Detected Model: {model}\n\nBind your RGB control keys below.")
+        super().__init__(title="ASUS Aura Control")
+        self.set_default_size(500, 600)
         
-        lbl.set_justify(Gtk.Justification.CENTER)
-        vbox.pack_start(lbl, False, False, 0)
+        # Load CSS
+        style_provider = Gtk.CssProvider()
+        style_provider.load_from_data(CSS.encode())
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
-        # Separator
-        vbox.pack_start(Gtk.Separator(), False, False, 5)
+        # HeaderBar
+        hb = Gtk.HeaderBar()
+        hb.set_show_close_button(True)
+        hb.set_title("ASUS Aura Control")
+        hb.set_subtitle("Keyboard Lighting")
+        self.set_titlebar(hb)
+
+        # Main Layout
+        self.main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.main_box.get_style_context().add_class("main-box")
+        self.add(self.main_box)
+
+        # Stack for navigation
+        self.stack = Gtk.Stack()
+        self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+        self.stack.set_transition_duration(300)
+
+        stack_switcher = Gtk.StackSwitcher()
+        stack_switcher.set_stack(self.stack)
+        hb.set_custom_title(stack_switcher)
+
+        # Pages
+        self.create_control_page()
+        self.create_shortcuts_page()
+
+        self.main_box.pack_start(self.stack, True, True, 0)
+        self.show_all()
+
+    def create_control_page(self):
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        vbox.set_margin_top(10)
+        
+        # --- Mode Selection ---
+        mode_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        mode_card.get_style_context().add_class("card")
+        
+        mode_label = Gtk.Label(label="Lighting Mode")
+        mode_label.get_style_context().add_class("section-title")
+        mode_label.set_halign(Gtk.Align.START)
+        mode_card.pack_start(mode_label, False, False, 0)
+
+        grid = Gtk.Grid(column_spacing=10, row_spacing=10)
+        grid.set_column_homogeneous(True)
+        
+        modes = [
+            ("Static", "static"),
+            ("Breathing", "breathing"),
+            ("Colorcycle", "colorcycle"),
+            ("Rainbow", "rainbow"),
+            ("Off", "black")
+        ]
+        
+        self.mode_buttons = {}
+        for i, (name, mode_id) in enumerate(modes):
+            btn = Gtk.RadioButton.new_with_label_from_widget(
+                self.mode_buttons.get("static") if i > 0 else None,
+                name
+            )
+            btn.set_mode(False) # Make it look like a regular button
+            btn.get_style_context().add_class("mode-button")
+            btn.connect("toggled", self.on_mode_toggled, mode_id)
+            grid.attach(btn, i % 3, i // 3, 1, 1)
+            self.mode_buttons[mode_id] = btn
+
+        mode_card.pack_start(grid, False, False, 0)
+        vbox.pack_start(mode_card, False, False, 0)
+
+        # --- Color Selection ---
+        self.color_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.color_card.get_style_context().add_class("card")
+        
+        color_label = Gtk.Label(label="Colors")
+        color_label.get_style_context().add_class("section-title")
+        color_label.set_halign(Gtk.Align.START)
+        self.color_card.pack_start(color_label, False, False, 0)
+
+        color_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
+        
+        # Main Color
+        c1_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        c1_vbox.pack_start(Gtk.Label(label="Primary"), False, False, 0)
+        self.color_btn1 = Gtk.ColorButton()
+        self.color_btn1.connect("color-set", self.apply_current_settings)
+        c1_vbox.pack_start(self.color_btn1, False, False, 0)
+        color_box.pack_start(c1_vbox, True, True, 0)
+
+        # Secondary Color (for breathing)
+        self.c2_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        self.c2_vbox.pack_start(Gtk.Label(label="Secondary"), False, False, 0)
+        self.color_btn2 = Gtk.ColorButton()
+        self.color_btn2.connect("color-set", self.apply_current_settings)
+        self.c2_vbox.pack_start(self.color_btn2, False, False, 0)
+        color_box.pack_start(self.c2_vbox, True, True, 0)
+
+        self.color_card.pack_start(color_box, False, False, 0)
+        vbox.pack_start(self.color_card, False, False, 0)
+
+        # --- Parameters (Speed & Brightness) ---
+        param_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        param_card.get_style_context().add_class("card")
+
+        # Brightness
+        brt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        brt_label = Gtk.Label(label="Brightness")
+        brt_label.set_halign(Gtk.Align.START)
+        brt_box.pack_start(brt_label, False, False, 0)
+        self.adj_brt = Gtk.Adjustment(value=2, lower=0, upper=3, step_increment=1)
+        self.scale_brt = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=self.adj_brt)
+        self.scale_brt.set_digits(0)
+        self.scale_brt.connect("value-changed", self.apply_current_settings)
+        brt_box.pack_start(self.scale_brt, False, False, 0)
+        param_card.pack_start(brt_box, False, False, 0)
+
+        # Speed
+        self.speed_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        speed_label = Gtk.Label(label="Effect Speed")
+        speed_label.set_halign(Gtk.Align.START)
+        self.speed_box.pack_start(speed_label, False, False, 0)
+        self.adj_speed = Gtk.Adjustment(value=2, lower=1, upper=3, step_increment=1)
+        self.scale_speed = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=self.adj_speed)
+        self.scale_speed.set_digits(0)
+        self.scale_speed.connect("value-changed", self.apply_current_settings)
+        self.speed_box.pack_start(self.scale_speed, False, False, 0)
+        param_card.pack_start(self.speed_box, False, False, 0)
+
+        vbox.pack_start(param_card, False, False, 0)
+
+        # Initialize UI state
+        self.update_ui_visibility("static")
+        
+        self.stack.add_titled(vbox, "control", "Control")
+
+    def create_shortcuts_page(self):
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        vbox.set_margin_top(10)
+        vbox.set_margin_bottom(10)
+
+        card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        card.get_style_context().add_class("card")
+        vbox.pack_start(card, False, False, 0)
+
+        lbl = Gtk.Label(label="Configure keyboard shortcuts to cycle through effects.")
+        lbl.set_line_wrap(True)
+        card.pack_start(lbl, False, False, 0)
 
         # Next Effect button
-        next_label = Gtk.Label(label="Next Effect (e.g., Fn+Right)")
-        next_label.set_halign(Gtk.Align.START)
-        vbox.pack_start(next_label, False, False, 0)
-
+        next_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        next_box.pack_start(Gtk.Label(label="Next Effect (e.g., Fn+Right)", xalign=0), False, False, 0)
         self.btn_next = Gtk.Button(label="Click to Bind Key")
-        self.btn_next.connect("clicked", self.on_btn_next_clicked)
-        self.btn_next.set_size_request(200, 45)
-        vbox.pack_start(self.btn_next, False, False, 0)
-
-        # Separator
-        vbox.pack_start(Gtk.Separator(), False, False, 5)
+        self.btn_next.connect("clicked", self.on_bind_clicked, "next")
+        next_box.pack_start(self.btn_next, False, False, 0)
+        card.pack_start(next_box, False, False, 0)
 
         # Previous Effect button
-        prev_label = Gtk.Label(label="Previous Effect (e.g., Fn+Left)")
-        prev_label.set_halign(Gtk.Align.START)
-        vbox.pack_start(prev_label, False, False, 0)
-
+        prev_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        prev_box.pack_start(Gtk.Label(label="Previous Effect (e.g., Fn+Left)", xalign=0), False, False, 0)
         self.btn_prev = Gtk.Button(label="Click to Bind Key")
-        self.btn_prev.connect("clicked", self.on_btn_prev_clicked)
-        self.btn_prev.set_size_request(200, 45)
-        vbox.pack_start(self.btn_prev, False, False, 0)
+        self.btn_prev.connect("clicked", self.on_bind_clicked, "prev")
+        prev_box.pack_start(self.btn_prev, False, False, 0)
+        card.pack_start(prev_box, False, False, 0)
 
-        # State tracking
-        self.listening_for = None  # "next" or "prev"
+        self.listening_for = None
         self.connect("key-press-event", self.on_key_press)
 
-    def on_btn_next_clicked(self, widget):
-        self.btn_next.set_label("Listening... Press a key!")
-        self.btn_prev.set_sensitive(False)
-        self.listening_for = "next"
+        self.stack.add_titled(vbox, "shortcuts", "Shortcuts")
 
-    def on_btn_prev_clicked(self, widget):
-        self.btn_prev.set_label("Listening... Press a key!")
-        self.btn_next.set_sensitive(False)
-        self.listening_for = "prev"
+    def on_mode_toggled(self, button, mode_id):
+        if button.get_active():
+            self.update_ui_visibility(mode_id)
+            self.apply_current_settings()
+
+    def update_ui_visibility(self, mode_id):
+        self.color_card.set_visible(mode_id in ["static", "breathing"])
+        self.c2_vbox.set_visible(mode_id == "breathing")
+        self.speed_box.set_visible(mode_id in ["breathing", "colorcycle", "rainbow"])
+
+    def get_hex_color(self, color_btn):
+        rgba = color_btn.get_rgba()
+        r = int(rgba.red * 255)
+        g = int(rgba.green * 255)
+        b = int(rgba.blue * 255)
+        return f"{r:02x}{g:02x}{b:02x}"
+
+    def apply_current_settings(self, *args):
+        # Determine which mode is active
+        mode_id = "static"
+        for m, btn in self.mode_buttons.items():
+            if btn.get_active():
+                mode_id = m
+                break
+        
+        brightness = int(self.scale_brt.get_value())
+        speed = int(self.scale_speed.get_value())
+        hex1 = self.get_hex_color(self.color_btn1)
+        hex2 = self.get_hex_color(self.color_btn2)
+
+        # Apply brightness first
+        run_cmd(["rogauracore", "brightness", str(brightness)])
+
+        state_idx = 8 # Default
+        if mode_id == "black":
+            run_cmd(["rogauracore", "black"])
+            state_idx = 11
+        elif mode_id == "static":
+            run_cmd(["rogauracore", "single_static", hex1])
+            # Mapping to state indices for asus-rgb-cycle
+            state_idx = 0 
+        elif mode_id == "breathing":
+            run_cmd(["rogauracore", "single_breathing", hex1, hex2, str(speed)])
+            state_idx = 10
+        elif mode_id == "colorcycle":
+            run_cmd(["rogauracore", "single_colorcycle", str(speed)])
+            state_idx = 9
+        elif mode_id == "rainbow":
+            run_cmd(["rogauracore", "rainbow_cycle", str(speed)])
+            state_idx = 8
+
+        set_state(state_idx)
+
+    # --- Keybinding Logic ---
+    def on_bind_clicked(self, widget, direction):
+        self.listening_for = direction
+        widget.set_label("Listening... Press a key!")
+        self.btn_next.set_sensitive(direction == "next")
+        self.btn_prev.set_sensitive(direction == "prev")
 
     def on_key_press(self, widget, event):
         if not self.listening_for:
             return False
 
-        binding = build_binding_string(event)
-        if not binding:
+        keyname = Gdk.keyval_name(event.keyval)
+        if not keyname or keyname in ['Control_L', 'Control_R', 'Shift_L', 'Shift_R', 'Alt_L', 'Alt_R', 'Super_L', 'Super_R']:
             return False
 
+        mods = ""
+        if event.state & Gdk.ModifierType.CONTROL_MASK: mods += "<Primary>"
+        if event.state & Gdk.ModifierType.MOD1_MASK: mods += "<Alt>"
+        if event.state & Gdk.ModifierType.SHIFT_MASK: mods += "<Shift>"
+        if event.state & Gdk.ModifierType.SUPER_MASK: mods += "<Super>"
+        binding = mods + keyname
+
         if self.listening_for == "next":
-            success = add_custom_shortcut(
-                "asus-rgb-next",
-                "ASUS RGB Next Effect",
-                "/usr/bin/asus-rgb-cycle next",
-                binding
-            )
+            success = add_custom_shortcut("asus-rgb-next", "ASUS RGB Next Effect", "/usr/bin/asus-rgb-cycle next", binding)
             btn = self.btn_next
         else:
-            success = add_custom_shortcut(
-                "asus-rgb-prev",
-                "ASUS RGB Previous Effect",
-                "/usr/bin/asus-rgb-cycle prev",
-                binding
-            )
+            success = add_custom_shortcut("asus-rgb-prev", "ASUS RGB Previous Effect", "/usr/bin/asus-rgb-cycle prev", binding)
             btn = self.btn_prev
 
         if success:
-            direction = "Next" if self.listening_for == "next" else "Previous"
-            dialog = Gtk.MessageDialog(
-                transient_for=self,
-                flags=0,
-                message_type=Gtk.MessageType.INFO,
-                buttons=Gtk.ButtonsType.OK,
-                text="Success!"
-            )
-            dialog.format_secondary_text(
-                f"Bound '{binding}' to {direction} Effect."
-            )
-            dialog.run()
-            dialog.destroy()
-            btn.set_label(f"Bound: {binding}  (Click to re-bind)")
+            btn.set_label(f"Bound: {binding}")
         else:
-            btn.set_label("Failed to bind key.")
+            btn.set_label("Failed to bind.")
 
         self.listening_for = None
         self.btn_next.set_sensitive(True)
@@ -173,7 +401,6 @@ class SetupWindow(Gtk.Window):
         return True
 
 if __name__ == '__main__':
-    win = SetupWindow()
+    win = AsusRGBGui()
     win.connect("destroy", Gtk.main_quit)
-    win.show_all()
     Gtk.main()

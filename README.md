@@ -5,9 +5,9 @@ A lightweight suite of tools and a graphical setup utility to control the RGB ke
 This package wraps the excellent [`rogauracore`](https://github.com/wroberts/rogauracore) utility, providing user-friendly interactive CLI menus, custom GNOME keybinding setups, and automated `udev` permissions.
 
 ## Features
-* **ASUS RGB Setup (GUI):** A Python GTK tool to automatically bind your `Fn` + Aura keys (or any custom keys) to cycle your RGB effects seamlessly within GNOME.
-* **ASUS RGB Control (CLI):** An interactive terminal menu using `whiptail` to manually set static colors, brightness, or breathing/rainbow effects without needing to remember hex codes.
-* **ASUS RGB Cycle (Background):** A tiny background script that cycles through popular RGB presets when triggered.
+* **ASUS Aura Control (GUI):** A modern Python GTK application to directly control lighting effects, colors, and brightness. It also includes an automated setup for mapping `Fn` + Aura keys to cycle effects.
+* **ASUS RGB Control (CLI):** An interactive terminal menu using `whiptail` for quick adjustments without a desktop environment.
+* **ASUS RGB Cycle (Background):** A background script that cycles through presets, used by the GUI and custom keybindings.
 * **Zero Sudo Required:** Automatically installs the required `udev` rules so your user account can communicate with the keyboard controller without needing root privileges.
 
 ## Dependencies
@@ -44,9 +44,13 @@ sudo make install
 
 ## Usage
 
-### 1. Automated Keybinding (GUI)
-Open your desktop application menu and launch **ASUS RGB Setup**. 
-Click the main button and press your Aura Key (e.g., `Fn+Right`). The utility will automatically map that key to the RGB cycle script in your GNOME desktop settings.
+### 1. ASUS Aura Control (GUI)
+Open your desktop application menu and launch **ASUS Aura Control**. 
+From here you can:
+*   **Switch Effects:** Choose between Static, Breathing, Colorcycle, and Rainbow modes.
+*   **Pick Colors:** Use the color picker to set your preferred primary and secondary colors.
+*   **Adjust Parameters:** Tweak brightness and effect speed on the fly.
+*   **Bind Keys:** Use the "Shortcuts" tab to map keys (like `Fn+Right`) to cycle effects.
 
 ### 2. Interactive Terminal Control
 Run the following command from your terminal to open the RGB menu:
