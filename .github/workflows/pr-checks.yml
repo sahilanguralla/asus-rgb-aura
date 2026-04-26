@@ -15,7 +15,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            debhelper devscripts dpkg-dev \
+            debhelper devscripts dpkg-dev build-essential \
+            make gcc autoconf libusb-1.0-0-dev \
             python3-gi gir1.2-gtk-3.0 \
             whiptail xvfb
 
