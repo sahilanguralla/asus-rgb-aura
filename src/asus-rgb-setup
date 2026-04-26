@@ -6,23 +6,23 @@ import os
 import sys
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib, Pango
+from gi.repository import Gtk, Gdk, GLib, Pango, GdkPixbuf
 
 # Constants
 STATE_FILE = os.path.expanduser("~/.config/rogauracore_state")
 DRY_RUN = "--dry-run" in sys.argv
 
-# Modern "Mocha" Palette CSS
+# Armoury Crate / Aura Sync Official Aesthetic
 CSS = """
 window {
-    background-color: #11111b;
-    color: #cdd6f4;
+    background-color: #000000;
+    color: #ffffff;
 }
 
-/* Sidebar Styling */
+/* Sidebar - Ultra Thin ROG style */
 .sidebar {
-    background-color: #181825;
-    border-right: 1px solid #313244;
+    background-color: #0d0d0d;
+    border-right: 1px solid #222222;
 }
 
 .sidebar list {
@@ -30,131 +30,180 @@ window {
 }
 
 .sidebar row {
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin: 4px 8px;
-    color: #a6adc8;
-    transition: all 0.2s ease;
+    padding: 20px 10px;
+    margin: 0;
+    color: #666666;
+    border-left: 3px solid transparent;
 }
 
 .sidebar row:selected {
-    background-color: #313244;
-    color: #89b4fa;
+    background-color: transparent;
+    color: #ff0000;
+    border-left: 3px solid #ff0000;
 }
 
-.sidebar row:hover:not(:selected) {
-    background-color: #1e1e2e;
-    color: #cdd6f4;
-}
-
-/* HeaderBar Styling */
-headerbar {
-    background: #11111b;
-    border-bottom: 1px solid #313244;
-    padding: 8px;
-}
-
-headerbar .title {
+/* Header & Tabs */
+.main-title {
+    font-size: 18pt;
     font-weight: 800;
-    font-size: 14pt;
-    color: #f5e0dc;
+    padding: 10px 0;
 }
 
-/* Card Styling */
-.card {
-    background-color: #1e1e2e;
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid #313244;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+.tabs-box {
+    border-bottom: 1px solid #222222;
+    margin-bottom: 20px;
 }
 
-.section-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #89b4fa;
-    margin-bottom: 12px;
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    color: #888888;
+    border-bottom: 3px solid transparent;
 }
 
-/* Mode Card Styling */
+.tab-btn:checked {
+    color: #ffffff;
+    border-bottom: 3px solid #ff0000;
+}
+
+/* Effect Grid */
+.effect-grid {
+    background: transparent;
+}
+
 .mode-card {
-    background-color: #313244;
-    border-radius: 12px;
-    padding: 16px;
-    transition: all 0.3s ease;
+    background: transparent;
+    padding: 10px;
+    border-radius: 0;
     border: 2px solid transparent;
 }
 
 .mode-card:hover {
-    background-color: #45475a;
-    transform: translateY(-2px);
+    background: #111111;
 }
 
 .mode-card.active {
-    border-color: #89b4fa;
-    background-color: #313244;
+    border-bottom: 2px solid #ff0000;
 }
 
 .mode-card label {
-    font-weight: 600;
+    font-size: 9pt;
+    color: #aaaaaa;
     margin-top: 8px;
 }
 
-/* Settings Rows */
-.settings-list {
-    background-color: transparent;
+.mode-card.active label {
+    color: #ffffff;
+}
+
+/* Settings Panel (Floating Box style) */
+.settings-panel {
+    background-color: #111111;
+    border: 1px solid #333333;
+    padding: 25px;
+    margin-left: 30px;
+    border-radius: 4px;
+    min-width: 380px;
+}
+
+.settings-title {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.settings-title.red {
+    color: #ff0000;
 }
 
 .settings-row {
-    padding: 12px;
-    border-bottom: 1px solid #313244;
+    padding: 15px 10px;
+    border-bottom: 1px solid #222222;
 }
 
 .settings-row:last-child {
     border-bottom: none;
 }
 
-/* Custom Scale/Slider */
+.settings-row label {
+    color: #888888;
+    font-size: 9pt;
+}
+
+/* Custom Scale */
 scale contents trough {
-    background-color: #313244;
-    border-radius: 10px;
-    min-height: 8px;
+    background-color: #333333;
+    min-height: 4px;
 }
 
 scale contents highlight {
-    background-color: #89b4fa;
-    border-radius: 10px;
+    background-color: #ffffff;
 }
 
 scale slider {
-    background-color: #f5e0dc;
+    background-color: #ffffff;
+    min-width: 12px;
+    min-height: 12px;
     border-radius: 50%;
-    min-width: 20px;
-    min-height: 20px;
-    margin: -6px;
 }
 
-/* Buttons */
+/* Color Squares */
+.color-square button {
+    border: 2px solid #333333;
+    background-color: #000000;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 4px;
+}
+
+/* Diamond Bullet */
+.diamond {
+    color: #ff0000;
+    font-size: 12pt;
+    margin-right: 10px;
+}
+
+.diamond.red {
+    color: #ff0000;
+}
+
+/* Action Buttons */
+.reset-btn {
+    background-color: #333d45;
+    color: #ffffff;
+    border-radius: 4px;
+    font-size: 9pt;
+    padding: 5px 15px;
+}
+
+.reset-btn:hover {
+    background-color: #44505a;
+}
+
 button.action-btn {
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-weight: 700;
-    transition: all 0.2s ease;
+    background-color: #333333;
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 8px 15px;
+    border: 1px solid #444444;
 }
 
-button.suggested-action {
-    background: linear-gradient(to right, #89b4fa, #b4befe);
-    color: #11111b;
+button.action-btn:hover {
+    background-color: #444444;
 }
 
-button.suggested-action:hover {
-    filter: brightness(1.1);
+button.action-btn:disabled {
+    background-color: #1a1a1a;
+    color: #666666;
 }
 """
 
 def run_cmd(args):
     if DRY_RUN:
-        print(f"[DRY-RUN] {' '.join(args)}")
+        print(f"[AURA] {' '.join(args)}")
         return True
     try:
         subprocess.run(args, check=True)
@@ -169,206 +218,272 @@ def set_state(index):
         with open(STATE_FILE, "w") as f: f.write(str(index))
     except Exception: pass
 
+def get_icon_path(name):
+    # Search in common locations
+    extensions = [".svg", ".png"]
+    for ext in extensions:
+        paths = [
+            os.path.join(os.path.dirname(__file__), "..", "data", "icons", "aura", f"{name}{ext}"),
+            os.path.join(os.path.dirname(__file__), "data", "icons", "aura", f"{name}{ext}"),
+            f"/usr/share/asus-rgb-aura/icons/aura/{name}{ext}"
+        ]
+        for p in paths:
+            if os.path.exists(p): return p
+    return None
+
+def add_custom_shortcut(shortcut_id, name, command, binding):
+    schema = 'org.gnome.settings-daemon.plugins.media-keys'
+    key = 'custom-keybindings'
+    try:
+        output = subprocess.check_output(['gsettings', 'get', schema, key], text=True).strip()
+    except Exception: return False
+    bindings = ast.literal_eval(output) if output != '@as []' else []
+    new_path = f"/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/{shortcut_id}/"
+    if new_path not in bindings: bindings.append(new_path)
+    bindings_str = str(bindings).replace("'", '"')
+    try:
+        subprocess.run(['gsettings', 'set', schema, key, bindings_str], check=True)
+        schema_custom = 'org.gnome.settings-daemon.plugins.media-keys.custom-keybinding'
+        path_arg = schema_custom + ':' + new_path
+        subprocess.run(['gsettings', 'set', path_arg, 'name', name], check=True)
+        subprocess.run(['gsettings', 'set', path_arg, 'command', command], check=True)
+        subprocess.run(['gsettings', 'set', path_arg, 'binding', binding], check=True)
+        return True
+    except Exception: return False
+
 class ModeCard(Gtk.Button):
     def __init__(self, name, mode_id, icon_name):
         super().__init__()
         self.mode_id = mode_id
         self.set_relief(Gtk.ReliefStyle.NONE)
         self.get_style_context().add_class("mode-card")
-
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         
-        # Icon
-        icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DND)
-        icon.set_pixel_size(48)
+        icon_path = get_icon_path(mode_id)
+        if icon_path:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_path, 48, 48, True)
+            icon = Gtk.Image.new_from_pixbuf(pixbuf)
+        else:
+            icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DND)
+            icon.set_pixel_size(48)
+            
         vbox.pack_start(icon, True, True, 0)
-
-        # Label
         label = Gtk.Label(label=name)
-        label.set_ellipsize(Pango.EllipsizeMode.END)
         vbox.pack_start(label, False, False, 0)
-
         self.add(vbox)
 
     def set_active_state(self, is_active):
-        if is_active:
-            self.get_style_context().add_class("active")
-        else:
-            self.get_style_context().remove_class("active")
+        if is_active: self.get_style_context().add_class("active")
+        else: self.get_style_context().remove_class("active")
 
 class AsusAuraGui(Gtk.Window):
     def __init__(self):
-        super().__init__(title="ASUS Aura Control")
-        self.set_default_size(850, 550)
+        super().__init__(title="Armoury Crate")
+        self.set_default_size(1150, 750)
         self.set_position(Gtk.WindowPosition.CENTER)
         
-        # Load CSS
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(CSS.encode())
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), style_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-        # Header
-        hb = Gtk.HeaderBar()
-        hb.set_show_close_button(True)
-        hb.set_title("ASUS Aura Control")
-        self.set_titlebar(hb)
-
-        # Main Layout: Sidebar + Stack
+        # Main Layout
         main_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.add(main_hbox)
 
-        # Stack for pages
-        self.stack = Gtk.Stack()
-        self.stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        self.stack.set_transition_duration(400)
-
         # Sidebar
+        self.sidebar_stack = Gtk.Stack()
+        self.sidebar_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+
         self.sidebar = Gtk.StackSidebar()
-        self.sidebar.set_stack(self.stack)
+        self.sidebar.set_stack(self.sidebar_stack)
         self.sidebar.get_style_context().add_class("sidebar")
-        self.sidebar.set_size_request(200, -1)
+        self.sidebar.set_size_request(60, -1)
         main_hbox.pack_start(self.sidebar, False, False, 0)
 
         # Content area
-        content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        main_hbox.pack_start(content_box, True, True, 0)
-        content_box.pack_start(self.stack, True, True, 0)
+        self.content_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.content_vbox.set_margin_start(40)
+        self.content_vbox.set_margin_end(40)
+        self.content_vbox.set_margin_top(20)
+        main_hbox.pack_start(self.content_vbox, True, True, 0)
+        self.content_vbox.pack_start(self.sidebar_stack, True, True, 0)
 
-        # Build Pages
-        self.build_control_page()
+        self.build_aura_sync_page()
         self.build_shortcuts_page()
+        
+        self.listening_for = None
+        self.connect("key-press-event", self.on_key_press)
         
         self.show_all()
 
-    def build_control_page(self):
-        scrolled = Gtk.ScrolledWindow()
-        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+    def build_aura_sync_page(self):
+        page_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
-        vbox.set_margin_start(30)
-        vbox.set_margin_end(30)
-        vbox.set_margin_top(20)
-        vbox.set_margin_bottom(20)
-        scrolled.add(vbox)
+        # Header
+        header_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        page_vbox.pack_start(header_hbox, False, False, 0)
+        
+        title_lbl = Gtk.Label(label="Aura Sync")
+        title_lbl.get_style_context().add_class("main-title")
+        header_hbox.pack_start(title_lbl, False, False, 0)
 
-        # --- Modes Section ---
-        modes_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        vbox.pack_start(modes_vbox, False, False, 0)
+        # Tabs
+        tabs_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        tabs_hbox.get_style_context().add_class("tabs-box")
+        page_vbox.pack_start(tabs_hbox, False, False, 0)
 
-        lbl = Gtk.Label(label="Lighting Mode", xalign=0)
-        lbl.get_style_context().add_class("section-title")
-        modes_vbox.pack_start(lbl, False, False, 0)
+        btn_effects = Gtk.RadioButton.new_with_label(None, "Aura effects")
+        btn_effects.set_mode(False)
+        btn_effects.get_style_context().add_class("tab-btn")
+        btn_effects.set_active(True)
+        tabs_hbox.pack_start(btn_effects, False, False, 0)
 
-        flowbox = Gtk.FlowBox()
-        flowbox.set_valign(Gtk.Align.START)
-        flowbox.set_max_children_per_line(5)
-        flowbox.set_selection_mode(Gtk.SelectionMode.NONE)
-        flowbox.set_column_spacing(12)
-        flowbox.set_row_spacing(12)
-        modes_vbox.pack_start(flowbox, False, False, 0)
+        # Reset button
+        reset_btn = Gtk.Button(label="Reset to default")
+        reset_btn.get_style_context().add_class("reset-btn")
+        reset_btn.set_valign(Gtk.Align.CENTER)
+        reset_btn.connect("clicked", lambda x: run_cmd(["rogauracore", "initialize_keyboard"]))
+        header_hbox.pack_end(reset_btn, False, False, 0)
+
+        # Body
+        body_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        body_hbox.set_margin_top(30)
+        page_vbox.pack_start(body_hbox, True, True, 0)
+
+        # Left: Grid
+        left_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        body_hbox.pack_start(left_vbox, True, True, 0)
+
+        basic_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        diamond = Gtk.Label(label="◆")
+        diamond.get_style_context().add_class("diamond")
+        diamond.get_style_context().add_class("red")
+        basic_hbox.pack_start(diamond, False, False, 0)
+        lbl_basic = Gtk.Label(label="BASIC EFFECTS")
+        lbl_basic.set_halign(Gtk.Align.START)
+        lbl_basic.get_style_context().add_class("settings-title")
+        lbl_basic.get_style_context().add_class("red")
+        basic_hbox.pack_start(lbl_basic, False, False, 0)
+        left_vbox.pack_start(basic_hbox, False, False, 0)
+
+        self.flowbox = Gtk.FlowBox()
+        self.flowbox.set_valign(Gtk.Align.START)
+        self.flowbox.set_max_children_per_line(6)
+        self.flowbox.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.flowbox.set_column_spacing(20)
+        self.flowbox.set_row_spacing(20)
+        left_vbox.pack_start(self.flowbox, False, False, 0)
 
         modes = [
+            ("Dark", "black", "system-shutdown-symbolic"),
             ("Static", "static", "preferences-desktop-wallpaper-symbolic"),
             ("Breathing", "breathing", "preferences-system-notifications-symbolic"),
-            ("Colorcycle", "colorcycle", "media-playlist-repeat-symbolic"),
+            ("Color Cycle", "colorcycle", "media-playlist-repeat-symbolic"),
             ("Rainbow", "rainbow", "applications-graphics-symbolic"),
-            ("Off", "black", "system-shutdown-symbolic"),
+            ("Multi Static", "multi_static", "preferences-desktop-theme-symbolic"),
         ]
 
         self.mode_cards = {}
         for name, mid, icon in modes:
             card = ModeCard(name, mid, icon)
             card.connect("clicked", self.on_mode_clicked)
-            flowbox.add(card)
+            self.flowbox.add(card)
             self.mode_cards[mid] = card
 
-        # --- Customization Section ---
-        self.custom_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
-        self.custom_card.get_style_context().add_class("card")
-        vbox.pack_start(self.custom_card, False, False, 0)
+        # Right: Settings Panel
+        self.settings_panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.settings_panel.get_style_context().add_class("settings-panel")
+        self.settings_panel.set_valign(Gtk.Align.START)
+        body_hbox.pack_start(self.settings_panel, False, False, 0)
 
-        lbl = Gtk.Label(label="Customization", xalign=0)
-        lbl.get_style_context().add_class("section-title")
-        self.custom_card.pack_start(lbl, False, False, 0)
+        self.active_mode_lbl = Gtk.Label(label="Static")
+        self.active_mode_lbl.get_style_context().add_class("settings-title")
+        self.active_mode_lbl.set_halign(Gtk.Align.START)
+        self.settings_panel.pack_start(self.active_mode_lbl, False, False, 0)
 
-        settings_list = Gtk.ListBox()
-        settings_list.get_style_context().add_class("settings-list")
-        settings_list.set_selection_mode(Gtk.SelectionMode.NONE)
-        self.custom_card.pack_start(settings_list, False, False, 0)
+        self.color_rows = []
+        for i in range(4):
+            lbl = f"Color {i+1}" if i > 0 else "Background"
+            self.color_rows.append(self.create_color_row(lbl))
 
-        # Brightness Row
-        self.scale_brt = self.create_settings_row(settings_list, "Brightness", 0, 3, 2)
-        self.scale_brt.connect("value-changed", self.apply_settings)
-
-        # Speed Row
-        self.speed_row, self.scale_speed = self.create_settings_row(settings_list, "Effect Speed", 1, 3, 2, return_row=True)
+        # Speed Slider
+        self.speed_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.speed_vbox.set_margin_top(20)
+        self.settings_panel.pack_start(self.speed_vbox, False, False, 0)
+        speed_lbl = Gtk.Label(label="Speed", xalign=0)
+        self.speed_vbox.pack_start(speed_lbl, False, False, 0)
+        adj_speed = Gtk.Adjustment(value=2, lower=1, upper=3, step_increment=1)
+        self.scale_speed = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=adj_speed)
+        self.scale_speed.set_draw_value(False)
         self.scale_speed.connect("value-changed", self.apply_settings)
+        self.speed_vbox.pack_start(self.scale_speed, False, False, 0)
 
-        # Colors Row
-        self.color_row = Gtk.ListBoxRow()
-        self.color_row.get_style_context().add_class("settings-row")
-        color_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        self.color_row.add(color_hbox)
-        
-        color_hbox.pack_start(Gtk.Label(label="Colors", xalign=0), True, True, 0)
-        
-        self.color_btn1 = Gtk.ColorButton()
-        self.color_btn1.connect("color-set", self.apply_settings)
-        color_hbox.pack_end(self.color_btn1, False, False, 0)
-        
-        self.color_btn2 = Gtk.ColorButton()
-        self.color_btn2.connect("color-set", self.apply_settings)
-        color_hbox.pack_end(self.color_btn2, False, False, 0)
-        
-        settings_list.add(self.color_row)
+        # Brightness
+        self.brt_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.settings_panel.pack_start(self.brt_vbox, False, False, 0)
+        brt_lbl = Gtk.Label(label="Brightness", xalign=0)
+        self.brt_vbox.pack_start(brt_lbl, False, False, 0)
+        adj_brt = Gtk.Adjustment(value=2, lower=0, upper=3, step_increment=1)
+        self.scale_brt = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=adj_brt)
+        self.scale_brt.set_draw_value(False)
+        self.scale_brt.connect("value-changed", self.apply_settings)
+        self.brt_vbox.pack_start(self.scale_brt, False, False, 0)
 
-        self.current_mode = "static"
+        self.current_mode = "black"
         self.update_ui_state()
-        self.stack.add_titled(scrolled, "control", "Lighting Control")
+        
+        self.sidebar_stack.add_titled(page_vbox, "aura", "Aura Sync")
 
     def build_shortcuts_page(self):
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
-        vbox.set_margin_start(30)
-        vbox.set_margin_end(30)
-        vbox.set_margin_top(20)
+        page_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        
+        title_lbl = Gtk.Label(label="Shortcuts")
+        title_lbl.get_style_context().add_class("main-title")
+        page_vbox.pack_start(title_lbl, False, False, 0)
 
-        card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
-        card.get_style_context().add_class("card")
-        vbox.pack_start(card, False, False, 0)
+        body_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        body_vbox.set_margin_top(30)
+        page_vbox.pack_start(body_vbox, True, True, 0)
 
-        lbl = Gtk.Label(label="Keyboard Shortcuts", xalign=0)
-        lbl.get_style_context().add_class("section-title")
-        card.pack_start(lbl, False, False, 0)
+        card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        card.get_style_context().add_class("settings-panel")
+        body_vbox.pack_start(card, False, False, 0)
+
+        basic_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        diamond = Gtk.Label(label="◆")
+        diamond.get_style_context().add_class("diamond")
+        diamond.get_style_context().add_class("red")
+        basic_hbox.pack_start(diamond, False, False, 0)
+        lbl_basic = Gtk.Label(label="KEYBOARD SHORTCUTS")
+        lbl_basic.set_halign(Gtk.Align.START)
+        lbl_basic.get_style_context().add_class("settings-title")
+        lbl_basic.get_style_context().add_class("red")
+        basic_hbox.pack_start(lbl_basic, False, False, 0)
+        card.pack_start(basic_hbox, False, False, 0)
 
         listbox = Gtk.ListBox()
-        listbox.get_style_context().add_class("settings-list")
         listbox.set_selection_mode(Gtk.SelectionMode.NONE)
+        listbox.get_style_context().add_class("settings-list")
         card.pack_start(listbox, False, False, 0)
 
-        self.btn_next = self.create_shortcut_row(listbox, "Next Effect", "next")
-        self.btn_prev = self.create_shortcut_row(listbox, "Previous Effect", "prev")
+        self.btn_next = self.create_shortcut_row(listbox, "Next Lighting Preset", "next")
+        self.btn_prev = self.create_shortcut_row(listbox, "Previous Lighting Preset", "prev")
 
-        self.listening_for = None
-        self.connect("key-press-event", self.on_key_press)
-        self.stack.add_titled(vbox, "shortcuts", "Shortcuts")
+        self.sidebar_stack.add_titled(page_vbox, "shortcuts", "Shortcuts")
 
-    def create_settings_row(self, listbox, label, lower, upper, default, return_row=False):
-        row = Gtk.ListBoxRow()
-        row.get_style_context().add_class("settings-row")
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
-        row.add(hbox)
+    def create_color_row(self, label):
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox.get_style_context().add_class("settings-row")
+        diamond = Gtk.Label(label="◆")
+        diamond.get_style_context().add_class("red")
+        hbox.pack_start(diamond, False, False, 0)
         hbox.pack_start(Gtk.Label(label=label, xalign=0), True, True, 0)
-        adj = Gtk.Adjustment(value=default, lower=lower, upper=upper, step_increment=1)
-        scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=adj)
-        scale.set_size_request(200, -1)
-        scale.set_digits(0)
-        scale.set_draw_value(False)
-        hbox.pack_start(scale, False, False, 0)
-        listbox.add(row)
-        return (row, scale) if return_row else scale
+        btn = Gtk.ColorButton()
+        btn.get_style_context().add_class("color-square")
+        btn.connect("color-set", self.apply_settings)
+        hbox.pack_end(btn, False, False, 0)
+        self.settings_panel.pack_start(hbox, False, False, 0)
+        return (hbox, btn)
 
     def create_shortcut_row(self, listbox, label, direction):
         row = Gtk.ListBoxRow()
@@ -376,50 +491,47 @@ class AsusAuraGui(Gtk.Window):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
         row.add(hbox)
         hbox.pack_start(Gtk.Label(label=label, xalign=0), True, True, 0)
-        btn = Gtk.Button(label="Bind Key")
+        btn = Gtk.Button(label="BIND KEY")
         btn.get_style_context().add_class("action-btn")
         btn.connect("clicked", self.on_bind_clicked, direction)
-        hbox.pack_start(btn, False, False, 0)
+        hbox.pack_end(btn, False, False, 0)
         listbox.add(row)
         return btn
 
     def on_mode_clicked(self, card):
         self.current_mode = card.mode_id
+        self.active_mode_lbl.set_label(card.get_child().get_children()[1].get_text())
         self.update_ui_state()
         self.apply_settings()
 
     def update_ui_state(self):
-        for mid, card in self.mode_cards.items():
-            card.set_active_state(mid == self.current_mode)
+        for mid, card in self.mode_cards.items(): card.set_active_state(mid == self.current_mode)
         
-        self.speed_row.set_visible(self.current_mode in ["breathing", "colorcycle", "rainbow"])
-        self.color_row.set_visible(self.current_mode in ["static", "breathing"])
-        self.color_btn2.set_visible(self.current_mode == "breathing")
+        is_dark = self.current_mode == "black"
+        self.speed_vbox.set_visible(not is_dark and self.current_mode in ["breathing", "colorcycle", "rainbow"])
+        self.brt_vbox.set_visible(not is_dark)
+        
+        # Color row visibility based on mode
+        self.color_rows[0][0].set_visible(not is_dark and self.current_mode in ["static", "breathing", "multi_static"])
+        self.color_rows[1][0].set_visible(not is_dark and self.current_mode in ["breathing", "multi_static"])
+        self.color_rows[2][0].set_visible(not is_dark and self.current_mode == "multi_static")
+        self.color_rows[3][0].set_visible(not is_dark and self.current_mode == "multi_static")
 
     def apply_settings(self, *args):
         brt = int(self.scale_brt.get_value())
         spd = int(self.scale_speed.get_value())
-        c1 = self.get_hex(self.color_btn1)
-        c2 = self.get_hex(self.color_btn2)
-
-        run_cmd(["rogauracore", "brightness", str(brt)])
+        colors = [self.get_hex(row[1]) for row in self.color_rows]
+        
+        if self.current_mode != "black":
+            run_cmd(["rogauracore", "brightness", str(brt)])
         
         idx = 8
-        if self.current_mode == "black":
-            run_cmd(["rogauracore", "black"])
-            idx = 11
-        elif self.current_mode == "static":
-            run_cmd(["rogauracore", "single_static", c1])
-            idx = 0
-        elif self.current_mode == "breathing":
-            run_cmd(["rogauracore", "single_breathing", c1, c2, str(spd)])
-            idx = 10
-        elif self.current_mode == "colorcycle":
-            run_cmd(["rogauracore", "single_colorcycle", str(spd)])
-            idx = 9
-        elif self.current_mode == "rainbow":
-            run_cmd(["rogauracore", "rainbow_cycle", str(spd)])
-            idx = 8
+        if self.current_mode == "black": run_cmd(["rogauracore", "black"]); idx = 11
+        elif self.current_mode == "static": run_cmd(["rogauracore", "single_static", colors[0]]); idx = 0
+        elif self.current_mode == "breathing": run_cmd(["rogauracore", "single_breathing", colors[0], colors[1], str(spd)]); idx = 10
+        elif self.current_mode == "colorcycle": run_cmd(["rogauracore", "single_colorcycle", str(spd)]); idx = 9
+        elif self.current_mode == "rainbow": run_cmd(["rogauracore", "rainbow_cycle", str(spd)]); idx = 8
+        elif self.current_mode == "multi_static": run_cmd(["rogauracore", "multi_static", colors[0], colors[1], colors[2], colors[3]]); idx = 1
         
         set_state(idx)
 
@@ -429,38 +541,27 @@ class AsusAuraGui(Gtk.Window):
 
     def on_bind_clicked(self, btn, direction):
         self.listening_for = direction
-        btn.set_label("Listening...")
+        btn.set_label("WAITING...")
         self.btn_next.set_sensitive(direction == "next")
         self.btn_prev.set_sensitive(direction == "prev")
 
     def on_key_press(self, widget, event):
         if not self.listening_for: return False
         name = Gdk.keyval_name(event.keyval)
-        if not name or "Control" in name or "Shift" in name or "Alt" in name or "Super" in name: return False
-        
+        if not name or any(m in name for m in ["Control", "Shift", "Alt", "Super"]): return False
         mods = ""
         if event.state & Gdk.ModifierType.CONTROL_MASK: mods += "<Primary>"
         if event.state & Gdk.ModifierType.MOD1_MASK: mods += "<Alt>"
         if event.state & Gdk.ModifierType.SHIFT_MASK: mods += "<Shift>"
         if event.state & Gdk.ModifierType.SUPER_MASK: mods += "<Super>"
         binding = mods + name
-
-        cmd = f"ASUS RGB {'Next' if self.listening_for == 'next' else 'Prev'} Effect"
-        # Dummy add_shortcut call for this logic
-        success = self.mock_add_shortcut(self.listening_for, binding)
-        
+        success = add_custom_shortcut(f"asus-rgb-{self.listening_for}", f"ASUS RGB {self.listening_for.capitalize()} Effect", f"/usr/bin/asus-rgb-cycle {self.listening_for}", binding)
         btn = self.btn_next if self.listening_for == "next" else self.btn_prev
-        btn.set_label(f"Bound: {binding}" if success else "Failed")
-        
+        btn.set_label(f"BOUND: {binding}" if success else "FAILED")
         self.listening_for = None
         self.btn_next.set_sensitive(True)
         self.btn_prev.set_sensitive(True)
         return True
-
-    def mock_add_shortcut(self, direction, binding):
-        # Implementation of add_custom_shortcut from earlier
-        # To keep it simple, I'll just call the global function
-        return add_custom_shortcut(f"asus-rgb-{direction}", f"ASUS RGB {direction.capitalize()} Effect", f"/usr/bin/asus-rgb-cycle {direction}", binding)
 
 if __name__ == '__main__':
     win = AsusAuraGui()
