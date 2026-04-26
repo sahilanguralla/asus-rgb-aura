@@ -13,6 +13,7 @@ jobs:
     env:
       DEBEMAIL: "asus-rgb-dev@thev.dev"
       DEBFULLNAME: "ASUS RGB Developer"
+      HUSKY: "0"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
