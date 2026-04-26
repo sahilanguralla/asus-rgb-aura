@@ -32,7 +32,7 @@ This is the recommended method. It automatically handles dependencies and compil
    ```
 3. Install the generated `.deb` file (located in the new `dist/` directory):
    ```bash
-   sudo apt install ./dist/asus-rgb-control_1.0.0-1_all.deb
+   sudo apt install ./dist/*.deb
    ```
 
 ### Method 2: Manual Source Installation (For Arch, Fedora, etc.)
