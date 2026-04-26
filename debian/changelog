@@ -1,5 +1,29 @@
 asus-rgb-control (1.0.0-1) unstable; urgency=medium
 
+  * # 1.0.0 (2026-04-26)   ### Bug Fixes  * **ci:** add build-essential
+    to release dependencies
+    ([c6afc42](https://github.com/sahilanguralla/asus-rgb-
+    aura/commit/c6afc4287ad40c85bb588bf5431265a022ee407c)) * **ci:**
+    disable husky hooks in github actions
+    ([7df77f3](https://github.com/sahilanguralla/asus-rgb-
+    aura/commit/7df77f315676bf4ce31612b5914d2c825e1f3408)) * **ci:**
+    ensure package.json version is updated and README uses generic paths
+    ([98c6d03](https://github.com/sahilanguralla/asus-rgb-
+    aura/commit/98c6d031c9f26cc5cd63c608913165a6bf2d78f3)) * **ci:**
+    handle concurrent pushes in prepare-release workflow
+    ([026d7e2](https://github.com/sahilanguralla/asus-rgb-
+    aura/commit/026d7e2222cbd5b6d7e93109b78d74d1520cdc7c)) * **ci:**
+    prevent interactive dch prompts in github actions
+    ([267f7d8](https://github.com/sahilanguralla/asus-rgb-
+    aura/commit/267f7d81cdfce5363e76686aa4f56572d5721c2c))   ###
+    Features  * **ci:** automate debian package building and release
+    ([f74516d](https://github.com/sahilanguralla/asus-rgb-
+    aura/commit/f74516d367545eb4b5e03e7fb23e6a892d078d8f))
+
+ -- ASUS RGB Developer <asus-rgb-dev@thev.dev>  Sun, 26 Apr 2026 06:32:56 +0000
+
+asus-rgb-control (1.0.0-1) unstable; urgency=medium
+
   * Initial Release.
 
  -- Community <example@example.com>  Sat, 25 Apr 2026 18:55:00 -0700
