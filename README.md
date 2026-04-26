@@ -68,3 +68,26 @@ sudo make uninstall
 
 ## License
 Provided as-is by the community. Underlying keyboard communication handled by `rogauracore` (c) 2019 Will Roberts.
+
+## Development
+
+### Conventional Commits
+This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification for commit messages. This allows for automated version bumping and changelog generation.
+
+Common types:
+- `feat`: A new feature (corresponds to a MINOR version bump)
+- `fix`: A bug fix (corresponds to a PATCH version bump)
+- `docs`: Documentation only changes
+- `style`: Changes that do not affect the meaning of the code
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `perf`: A code change that improves performance
+- `test`: Adding missing tests or correcting existing tests
+- `chore`: Changes to the build process or auxiliary tools and libraries
+
+### Automated Versioning
+The project uses `semantic-release` via GitHub Actions to automatically:
+1. Analyze commits since the last release.
+2. Bump the version in `debian/changelog` and `package.json`.
+3. Create a new GitHub Release and Git tag.
+
+To trigger a release, simply merge your PR into the `main` branch.

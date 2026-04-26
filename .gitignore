@@ -5,3 +5,14 @@ debian/debhelper-build-stamp
 debian/files
 debian/*.substvars
 dist/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# System files
+.DS_Store
+Thumbs.db
