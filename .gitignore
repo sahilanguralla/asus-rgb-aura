@@ -3,3 +3,4 @@ debian/asus-rgb-control/
 debian/.debhelper/
 debian/debhelper-build-stamp
 debian/files
+debian/*.substvars
